@@ -46,12 +46,20 @@ export class GetCourses extends OpenAPIRoute {
                     message: 'No courses found'
                 }
             }
+            const instructorList = await db.select().from(users).where(eq(users.role, 'INSTRUCTOR')).all()  
+
+            const coursesWithInstructors = courseResults.map(course => {
+                return {
+                    ...course,
+                    instructor: instructorList.find(instructor => instructor.user_id === course.instructor_id)
+                };
+            });
 
             // Fetch all chapters
             const chapterResults = await db.select().from(chapters).all();
 
             // Nest chapters within their respective courses
-            const coursesWithChapters = courseResults.map(course => {
+            const coursesWithChapters = coursesWithInstructors.map(course => {
                 return {
                     ...course,
                     chapters: chapterResults.filter(chapter => chapter.course_id === course.course_id)

@@ -46,6 +46,9 @@ export class AuthLogin extends OpenAPIRoute {
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
         try {
             
+            // request.headers.set('Access-Control-Allow-Origin', '*');
+
+
             const { name, email, password } = data.body;
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
@@ -56,7 +59,7 @@ export class AuthLogin extends OpenAPIRoute {
             if (!results[0] || !results[0] == undefined || !results[0] == null) {
                 return new Response(JSON.stringify({
                     success: false,
-                    errors: "Unknown user"
+                    message: "Unknown user"
                 }), {
                     headers: {
                         'content-type': 'application/json;charset=UTF-8',

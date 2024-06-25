@@ -37,7 +37,7 @@ export class MartCourse extends OpenAPIRoute {
                     message: 'Invalid course data'
                 }
             }
-
+            courseData.user_id = env.user_id;
             const db = drizzle(env.DB);
           
             const result = await db.insert(user_complete_chapter).values(courseData).returning();

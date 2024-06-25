@@ -8,6 +8,34 @@
       "when": 1718375500899,
       "tag": "0000_same_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1718808846911,
+      "tag": "0001_fearless_the_hunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1719288365325,
+      "tag": "0002_brave_ben_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1719289863265,
+      "tag": "0003_spooky_charles_xavier",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1719292198325,
+      "tag": "0004_oval_ken_ellis",
+      "breakpoints": true
     }
   ]
 }

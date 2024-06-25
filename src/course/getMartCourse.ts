@@ -8,9 +8,6 @@ export class GetMartCourse extends OpenAPIRoute {
         tags: ["Course"],
         summary: "Get Mart Course",
         parameters: {
-        user_id: Query(Int, {
-              description: 'insert user_id to get complete chapter',
-            }),
         course_id: Query(Int, {
             description: 'insert course_id to get complete chapter',
           }),
@@ -28,10 +25,10 @@ export class GetMartCourse extends OpenAPIRoute {
  
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
         try {
-            const { user_id, course_id } = data.query
+            const { course_id } = data.query
 
 
-            if (!user_id || !course_id) {
+            if (!course_id) {
                 return {
                     success: false,
                     message: 'undefined data'
@@ -41,7 +38,7 @@ export class GetMartCourse extends OpenAPIRoute {
             const db = drizzle(env.DB);
           
             const result = await db.select().from(user_complete_chapter)
-                                .where(and(eq(user_complete_chapter.user_id, user_id), eq(user_complete_chapter.course_id, course_id))).all();
+                                .where(and(eq(user_complete_chapter.user_id, env.user_id), eq(user_complete_chapter.course_id, course_id))).all();
             if (result.length === 0) {
                 return {
                     success: false,

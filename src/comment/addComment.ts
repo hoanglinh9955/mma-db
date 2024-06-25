@@ -36,7 +36,7 @@ export class AddComment extends OpenAPIRoute {
                     message: 'Invalid comment data'
                 }
             }
-
+            comment.user_id = env.user_id;
             const db = drizzle(env.DB);
 
             const result = await db.insert(comments).values(comment).returning();

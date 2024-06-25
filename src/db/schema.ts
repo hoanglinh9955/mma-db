@@ -5,6 +5,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 export const users = sqliteTable('users', {
   user_id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   user_name: text('user_name', { length: 255 }),
+  instruction_description: text('instruction_description'),
   email: text('email', { length: 255 }).unique(),
   password: text('password'),
   date_of_birth: text('date_of_birth'),
@@ -29,7 +30,11 @@ export const courses = sqliteTable('courses', {
   is_trial: integer('is_trial', { mode: 'boolean' }),
   is_verify: integer('is_verify', { mode: 'boolean' }),
   image_url: text('image_url'),
+  hour: integer('hour', { mode: 'number' }),
   create_at: integer('create_at'),
+  update_at: integer('update_at'),
+  comments: text('comments'),
+  comment_owner: text('comment_owner'),
 });
 
 export const chapters = sqliteTable('chapter', {
@@ -45,7 +50,8 @@ export const enrollments = sqliteTable('enrollments', {
   enrollment_id: integer('enrollment_id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   user_id: integer('customer_id').references(() => users.user_id),
   course_id: integer('course_id').references(() => courses.course_id),
-  enrolled_at: integer('enrolled_at') 
+  enrolled_at: integer('enrolled_at'),
+  price: integer('price', { mode: 'number' }),
 });
 
 

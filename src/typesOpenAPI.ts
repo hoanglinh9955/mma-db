@@ -5,8 +5,6 @@ export const User = {
 	user_name: new Str({example: "Linh"}),
 	email: new Email(),	
 	password: z.string().min(8).max(16),
-	date_of_birth: new Str({example: "02-02-2002"}),
-	image_url: new Str({example: "https://images.pexels.com/photos/3715583/pexels-photo-3715583.jpeg"}),
 };
 
 export const Chapter = {
@@ -28,13 +26,11 @@ export const Course = {
 };
 
 export const Enrollment = {
-	user_id: new Num({ example: 1 }),
 	course_id: new Num({ example: 1 }),
 	enrolled_at: new Num({ example: 1718377307294 }),
 };
 
 export const Comment = {
-	user_id: new Num({ example: 1 }),
 	course_id: new Num({ example: 1 }),
 	rate: new Num({ example: 5 }),
 	comment: new Str({example: "comment"}),
@@ -42,7 +38,6 @@ export const Comment = {
 };
 
 export const UserCompleteChapter = {
-	user_id: new Num({ example: 1 }),
 	course_id: new Num({ example: 7 }),
 	chapter_id: new Num({ example: 1 }),
 	completed_at: new Num({ example: 1718377307294 }),

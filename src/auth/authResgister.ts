@@ -20,8 +20,6 @@ export class AuthRegister extends OpenAPIRoute {
                             email: String,
                             user_name: String,
                             hashPassword: String,
-                            date_of_birth: String,
-                            image_url: String,
                         }]
                 },
             },
@@ -38,10 +36,10 @@ export class AuthRegister extends OpenAPIRoute {
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
         try {
             
-            const { user_name, email, password, date_of_birth, image_url } = data.body;
+            const { user_name, email, password } = data.body;
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
-            const results = await db.insert(users).values({ user_name: user_name, email: email, password: hashedPassword, date_of_birth: date_of_birth, image_url: image_url, role: 'USER'}).returning();
+            const results = await db.insert(users).values({ user_name: user_name, email: email, password: hashedPassword, image_url: 'https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg', role: 'USER'}).returning();
 
             return {
                 success: true,
