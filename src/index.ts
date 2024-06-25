@@ -16,6 +16,7 @@ import { AddEnroll } from "enroll/addEnroll";
 import { GetEnroll } from "enroll/getEnroll";
 import { get } from "http";
 import { GetUser } from "users/getAllUsers";
+import { UpdateCustomerProfile } from "users/updateCustomerProfile";
 
 
 
@@ -47,6 +48,7 @@ router.post('/api/auth/login', AuthLogin);
 router.all('/api/*', authenticateUser)
 
 router.get("/api/user", GetUser);
+router.put("/api/updateCustomerProfile", UpdateCustomerProfile);
 router.post("/api/course", AddCourse);
 router.get("/api/getCourse", GetCourses);
 router.get("/api/getCourseById", GetCourseById);
@@ -59,7 +61,6 @@ router.delete("/api/deleteCompleteChapter", deleteCompleteCourse);
 
 router.post("/api/addEnroll", AddEnroll);
 router.get("/api/getEnroll", GetEnroll);
-router.get("/api/getEnrollasdfasdf", GetEnroll);
 router.post("/api/addComment", AddComment);
 router.get("/api/getCommentByCourseId", getCommentByCourseId);
 
