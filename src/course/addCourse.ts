@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { Chapter, Course, User } from "typesOpenAPI";
 export class AddCourse extends OpenAPIRoute {
     static schema = {
-        tags: ["Course"],
+        tags: ["Instructor"],
         summary: "add Course",
         requestBody: {
             courseData: Course,

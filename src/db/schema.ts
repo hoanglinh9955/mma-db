@@ -29,6 +29,7 @@ export const courses = sqliteTable('courses', {
   category: text('category', { length: 100 }),
   is_trial: integer('is_trial', { mode: 'boolean' }),
   is_verify: integer('is_verify', { mode: 'boolean' }),
+  is_submit: integer('is_submit', { mode: 'boolean' }),
   image_url: text('image_url'),
   hour: integer('hour', { mode: 'number' }),
   create_at: integer('create_at'),

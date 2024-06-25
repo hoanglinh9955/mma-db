@@ -1,12 +1,14 @@
 import { OpenAPIRouter } from "@cloudflare/itty-router-openapi";
-import { authenticateUser } from "auth/authenticateUser";
+import { authenticateInstructor, authenticateUser } from "auth/authenticateUser";
 import { AuthLogin } from "auth/authLogin";
 import { AuthRegister } from "auth/authResgister";
 import { AddComment } from "comment/addComment";
+import { AddCommentInstructor } from "comment/addCommentInstructor";
 import { getCommentByCourseId } from "comment/getCommentByCourseId";
 import { AddCourse } from "course/addCourse";
 import { deleteCompleteCourse } from "course/deleteCompleteChapter";
 import { GetCourseById } from "course/getCourseById";
+import { GetCoursesByInstrucId } from "course/getCourseByInstrucId";
 import { GetCoursesByInstructorId } from "course/getCourseByInstructorId";
 import { GetCourses } from "course/getCourses";
 import { GetCoursesByInstructor } from "course/getInstructors";
@@ -17,6 +19,7 @@ import { GetEnroll } from "enroll/getEnroll";
 import { get } from "http";
 import { GetUser } from "users/getAllUsers";
 import { UpdateCustomerProfile } from "users/updateCustomerProfile";
+import { UpdateInstructorProfile } from "users/updateInstructorProfile";
 
 
 
@@ -44,12 +47,11 @@ router.registry.registerComponent('securitySchemes', 'bearerAuth', {
 router.post('/api/auth/register', AuthRegister);
 router.post('/api/auth/login', AuthLogin);
 
-
+//user
 router.all('/api/*', authenticateUser)
 
 router.get("/api/user", GetUser);
 router.put("/api/updateCustomerProfile", UpdateCustomerProfile);
-router.post("/api/course", AddCourse);
 router.get("/api/getCourse", GetCourses);
 router.get("/api/getCourseById", GetCourseById);
 router.get("/api/getCourseByInstructorId", GetCoursesByInstructorId);
@@ -63,10 +65,13 @@ router.get("/api/getEnroll", GetEnroll);
 router.post("/api/addComment", AddComment);
 router.get("/api/getCommentByCourseId", getCommentByCourseId);
 
-//admin
-router.all('/api/instuctor/*', authenticateUser)
-
-
+//Instructor
+router.all('/api/instructor/*', authenticateInstructor)
+router.post("/api/instructor/course", AddCourse);
+router.get("/api/instructor/getCourseByInstructorId", GetCoursesByInstrucId);
+router.post("/api/instructor/addComment", AddCommentInstructor);
+router.put("/api/instructor/updateInstructorProfile", UpdateInstructorProfile);
+router.get("/api/instructor/getCommentByCourseId", getCommentByCourseId);
 // 404 for everything else
 router.all("*", () =>
 	Response.json(

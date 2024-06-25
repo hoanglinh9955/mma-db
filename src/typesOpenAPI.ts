@@ -1,4 +1,5 @@
 import { DateTime, Str, Num, Bool, Email, Arr } from "@cloudflare/itty-router-openapi";
+import { is } from "drizzle-orm";
 import { z } from 'zod'
 
 export const User = {
@@ -28,6 +29,7 @@ export const Course = {
 	category: new Str({example: "basic"}),
 	is_trial: new Bool({ example: "false" }),
 	is_verify: new Bool({ example: "false" }),
+	is_submit: new Bool({ example: "false" }),
 	image_url: new Str({example: "https://images.pexels.com/photos/3715583/pexels-photo-3715583.jpeg"}),
 	create_at: new Num({ example: 1718377307294 }),
 };
