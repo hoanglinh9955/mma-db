@@ -58,11 +58,13 @@ router.post("/api/addCompleteChapter", MartCourse);
 router.get("/api/getCompleteChapter", GetMartCourse);
 router.delete("/api/deleteCompleteChapter", deleteCompleteCourse);
 
-
 router.post("/api/addEnroll", AddEnroll);
 router.get("/api/getEnroll", GetEnroll);
 router.post("/api/addComment", AddComment);
 router.get("/api/getCommentByCourseId", getCommentByCourseId);
+
+//admin
+router.all('/api/instuctor/*', authenticateUser)
 
 
 // 404 for everything else

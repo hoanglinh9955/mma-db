@@ -1,4 +1,4 @@
-import { users_sessions } from "db/schema"
+import { users, users_sessions } from "db/schema"
 import { and, eq, gt, lt } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/d1"
 
@@ -49,7 +49,18 @@ export async function authenticateUser(request: Request, env: any, context: any)
             status: 401,
         })
     }
-    
-    
+    result = await db.select().from(users).where(eq(users.user_id, session[0].user_id))
+    if(result[0].role != "INSTRUCTOR") {
+        return new Response(JSON.stringify({
+            success: false,
+            errors: "Authentication error",
+            message: "You are not an instructor",
+        }), {
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+            },
+            status: 401,
+        })
+    }
     env.user_id = session[0].user_id
 }
