@@ -76,7 +76,7 @@ export class GetCourses extends OpenAPIRoute {
                 filtedCourses = filtedCourses.filter(course => course.category === category);
             }
             if (name) {
-                filtedCourses = filtedCourses.filter(course => course.title.includes(name));
+                filtedCourses = filtedCourses.filter(course => course.title.toLowerCase().includes(name.toLowerCase()));
             }
 
             return  { 

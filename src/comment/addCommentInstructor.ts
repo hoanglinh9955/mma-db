@@ -54,10 +54,20 @@ export class AddCommentInstructor extends OpenAPIRoute {
             }
 
       
+            const userList = await db.select().from(users).where(eq(users.role, 'USER')).all()  
+
+            const commentWithUsers = result.map(comment => {
+                return {
+                    ...comment,
+                    userData: userList.find(user => user.user_id === comment.user_id)
+                };
+            });
+
+      
             return { 
                 success: true, 
-                enrollment: result[0] 
-            }
+                comments: commentWithUsers
+            }   
 
         } catch (e) {
             return new Response(e)

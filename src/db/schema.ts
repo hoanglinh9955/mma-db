@@ -52,6 +52,7 @@ export const enrollments = sqliteTable('enrollments', {
   user_id: integer('customer_id').references(() => users.user_id),
   course_id: integer('course_id').references(() => courses.course_id),
   enrolled_at: integer('enrolled_at'),
+  instructor_id: integer('instructor_id').references(() => users.user_id),
   price: integer('price', { mode: 'number' }),
 });
 

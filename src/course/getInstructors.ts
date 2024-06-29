@@ -7,6 +7,12 @@ export class GetCoursesByInstructor extends OpenAPIRoute {
     static schema = {
         tags: ["Course"],
         summary: "Get All Instructors",
+        parameters: {
+            name: Query(Str, {
+                description: 'sort instructor by name',
+                required: false,
+              }),
+          },
         responses: {
             "200": {
               description: "Get Successful",
@@ -21,6 +27,8 @@ export class GetCoursesByInstructor extends OpenAPIRoute {
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
         try {
 
+            const { name } = data.query
+
             const db = drizzle(env.DB);
             const instructorList = await db.select().from(users).where(eq(users.role, 'INSTRUCTOR')).all()  
 
@@ -31,17 +39,23 @@ export class GetCoursesByInstructor extends OpenAPIRoute {
                 }
             }
 
+            let filtedCourses = instructorList;
+
+            if (name) {
+                filtedCourses = filtedCourses.filter(instructor => instructor.user_name.toLowerCase().includes(name.toLowerCase()));
+            }
+
             // Fetch all chapters
             const courseResults = await db.select().from(courses).all();
 
             // Nest chapters within their respective courses
-            const instructorWithCourse = instructorList.map(instructor => {
+            const instructorWithCourse = filtedCourses.map(instructor => {
                 return {
                     ...instructor,
                     courses: courseResults.filter(course => course.instructor_id === instructor.user_id)
                 };
             });
-         
+            
 
             return  { 
                 success: true, 

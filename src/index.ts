@@ -16,14 +16,16 @@ import { GetMartCourse } from "course/getMartCourse";
 import { MartCourse } from "course/markCourse";
 import { AddEnroll } from "enroll/addEnroll";
 import { GetEnroll } from "enroll/getEnroll";
-import { get } from "http";
+import { GetOrderByInstructor } from "enroll/getOrderByInstructor";
 import { GetUser } from "users/getAllUsers";
 import { UpdateCustomerProfile } from "users/updateCustomerProfile";
 import { UpdateInstructorProfile } from "users/updateInstructorProfile";
+import { AutoRouter, cors } from 'itty-router'
+
+const { preflight, corsify } = cors()
 
 
-
-  export const router = OpenAPIRouter({
+export const router = OpenAPIRouter({
     schema: {
        info: {
           title: "Authentication using D1",
@@ -36,16 +38,20 @@ import { UpdateInstructorProfile } from "users/updateInstructorProfile";
        ],
     },
     docs_url: "/",
+    
 });
-
 
 router.registry.registerComponent('securitySchemes', 'bearerAuth', {
     type: 'http',
     scheme: 'bearer',
 })
+router.all('*', preflight)
 
 router.post('/api/auth/register', AuthRegister);
 router.post('/api/auth/login', AuthLogin);
+
+router.get('/api/test', () => new Response('CORS test successful'));
+
 
 //user
 router.all('/api/*', authenticateUser)
@@ -72,7 +78,11 @@ router.get("/api/instructor/getCourseByInstructorId", GetCoursesByInstrucId);
 router.post("/api/instructor/addComment", AddCommentInstructor);
 router.put("/api/instructor/updateInstructorProfile", UpdateInstructorProfile);
 router.get("/api/instructor/getCommentByCourseId", getCommentByCourseId);
+router.get("/api/instructor/getOrderByInstructor", GetOrderByInstructor);
 // 404 for everything else
+
+router.all('*', corsify)
+
 router.all("*", () =>
 	Response.json(
 		{
@@ -82,6 +92,7 @@ router.all("*", () =>
 		{ status: 404 }
 	)
 );
+
 
 export default {
 	fetch: router.handle,

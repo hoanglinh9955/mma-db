@@ -36,6 +36,8 @@ export const Course = {
 
 export const Enrollment = {
 	course_id: new Num({ example: 1 }),
+	price: new Num({ example: 900000 }),
+	instructor_id: new Num({ example: 2 }),
 	enrolled_at: new Num({ example: 1718377307294 }),
 };
 

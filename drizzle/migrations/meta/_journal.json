@@ -43,6 +43,13 @@
       "when": 1719334183256,
       "tag": "0005_blue_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1719384582062,
+      "tag": "0006_fuzzy_ravenous",
+      "breakpoints": true
     }
   ]
 }
