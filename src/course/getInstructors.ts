@@ -46,7 +46,7 @@ export class GetCoursesByInstructor extends OpenAPIRoute {
             }
 
             // Fetch all chapters
-            const courseResults = await db.select().from(courses).all();
+            const courseResults = await db.select().from(courses).where(eq(courses.is_verify, true)).all();
 
             // Nest chapters within their respective courses
             const instructorWithCourse = filtedCourses.map(instructor => {
@@ -55,11 +55,24 @@ export class GetCoursesByInstructor extends OpenAPIRoute {
                     courses: courseResults.filter(course => course.instructor_id === instructor.user_id)
                 };
             });
+
+            const chapterResults = await db.select().from(chapters).all();
             
+            const instructorWithCourseWithChapter = instructorWithCourse.map(instructor => {
+                return {
+                    ...instructor,
+                    courses: instructor.courses.map(course => {
+                        return {
+                            ...course,
+                            chapters: chapterResults.filter(chapter => chapter.course_id === course.course_id)
+                        };
+                    })
+                };
+            });
 
             return  { 
                 success: true, 
-                instructorList: instructorWithCourse 
+                instructorList: instructorWithCourseWithChapter 
             }
         } catch (e) {
             return new Response(e)

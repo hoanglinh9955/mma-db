@@ -1,5 +1,5 @@
 import { Bool, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
-import { courses, users, chapters } from "db/schema";
+import { courses, users, chapters, user_complete_chapter } from "db/schema";
 import { eq } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
 import { Chapter, Course, User } from "typesOpenAPI";
@@ -48,12 +48,16 @@ export class GetCourses extends OpenAPIRoute {
             }
             const instructorList = await db.select().from(users).where(eq(users.role, 'INSTRUCTOR')).all()  
 
+            const completedChapters = await db.select().from(user_complete_chapter).where(eq(user_complete_chapter.user_id, env.user_id)).all()
+
             const coursesWithInstructors = courseResults.map(course => {
                 return {
                     ...course,
-                    instructor: instructorList.find(instructor => instructor.user_id === course.instructor_id)
+                    instructor: instructorList.find(instructor => instructor.user_id === course.instructor_id),
+                    chapterCompleted: completedChapters.filter(chapterComplete => chapterComplete.course_id === course.course_id)
                 };
             });
+
 
             // Fetch all chapters
             const chapterResults = await db.select().from(chapters).all();

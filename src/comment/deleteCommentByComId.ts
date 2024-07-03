@@ -1,13 +1,15 @@
-import { OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
+import { Num, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
 import { courses, users, chapters, enrollments, comments } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
 import { Comment } from "typesOpenAPI";
-export class AddComment extends OpenAPIRoute {
+export class DeleteComment extends OpenAPIRoute {
     static schema = {
         tags: ["Comment"],
-        summary: "add comment",
-        requestBody: { comment: Comment }, 
+        summary: "delete comment by comment id",
+        requestBody: { 
+            comment_id: new Num({ example: 2 }),
+    }, 
         responses: {
             "200": {
               description: "Post Successful",
@@ -28,27 +30,24 @@ export class AddComment extends OpenAPIRoute {
                 }
             }
 
-            const { comment } = data.body;
+            const { comment_id } = data.body;
 
-            if (!comment) {
+            if (!comment_id) {
                 return {
                     success: false,
                     message: 'Invalid comment data'
                 }
             }
-            comment.user_id = env.user_id;
             const db = drizzle(env.DB);
 
-            const result = await db.insert(comments).values(comment).returning();
-            
+            const result = await db.delete(comments).where(eq(comments.comment_id, comment_id)).returning();
+
             if(!result){
                 return {
                     success: false,
-                    message: 'Failed to add comment'
+                    message: 'Failed to delete comment'
                 }
             }
-
-      
             return { 
                 success: true, 
                 comment: result[0] 

@@ -1,4 +1,4 @@
-import { Email, OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
+import { Email, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
 import { users, users_sessions } from "db/schema";
 import { eq, and } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
@@ -6,11 +6,12 @@ import { User } from "typesOpenAPI";
 import { hashPassword } from "utils";
 import { z } from 'zod';
 
-export class AuthLogin extends OpenAPIRoute {
+export class changePasswordWithResetToken extends OpenAPIRoute {
     static schema = {
-        tags: ['Auth'],
-        summary: 'Login user',
+        tags: ['User'],
+        summary: 'Change Password With Reset Token step 2',
         requestBody: {
+            token: z.string(),
             email: new Email(),
             password: z.string().min(8).max(16),
         },
@@ -19,13 +20,6 @@ export class AuthLogin extends OpenAPIRoute {
                 description: "Successful response",
                 schema: {
                     success: Boolean,
-                    result: {
-                        session: {
-                            token: String,
-                            expires_at: String,
-                        },
-                        user: User,
-                    },
                 },
             },
             '400': {
@@ -55,46 +49,64 @@ export class AuthLogin extends OpenAPIRoute {
         }
 
         try {
-            const { email, password } = data.body;
+            const { token, email, password } = data.body;
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
 
-            const results = await db.select().from(users).where(and(eq(users.email, email), eq(users.password, hashedPassword)));
-
+            const results = await db.select().from(users).where(eq(users.email, email));
             if (!results[0]) {
                 return new Response(JSON.stringify({
                     success: false,
-                    message: "Unknown user",
+                    message: "Invalid Email",
                 }), {
                     headers: {
                         ...corsHeaders,
-                        'content-type': 'application/json;charset=UTF-8',
+                        'Content-Type': 'application/json;charset=UTF-8',
                     },
                 });
             }
 
-            let expiration = new Date();
-            expiration.setDate(expiration.getDate() + 7);
-            let timeDate = expiration.getTime();
-            let token = await hashPassword((Math.random() + 1).toString(3), env.SECRET);
-            const session = await db.insert(users_sessions).values({ user_id: results[0].user_id, token: token, expires_at: timeDate }).returning();
-            const user = await db.select().from(users).where(eq(users.user_id, session[0].user_id));
-
-            return new Response(JSON.stringify({
-                success: true,
-                result: {
-                    session: {
-                        token: session[0].token,
-                        expires_at: session[0].expires_at,
+            const value = await env.mma_kv.get(email);
+            if (value === null) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: "Invalid Token",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
                     },
-                    user: user[0],
-                },
-            }), {
-                headers: {
-                    ...corsHeaders,
-                    'content-type': 'application/json;charset=UTF-8',
-                },
-            });
+                });
+            }
+
+            if (value !== token) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: "Invalid Token",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
+            }
+            if (value === token) {
+                const result = await db.update(users).set({ password: hashedPassword }).where(eq(users.email, email)).returning();
+                if(result[0]) {
+                    await env.mma_kv.delete(email);
+                    return new Response(JSON.stringify({
+                        success: true,
+                        result
+                    }), {
+                        headers: {
+                            ...corsHeaders,
+                            'Content-Type': 'application/json;charset=UTF-8',
+                        },
+                    });
+                }
+            }
+ 
+
         } catch (e) {
             return new Response(JSON.stringify({
                 success: false,

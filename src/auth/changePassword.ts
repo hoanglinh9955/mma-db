@@ -1,4 +1,4 @@
-import { Email, OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
+import { Email, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
 import { users, users_sessions } from "db/schema";
 import { eq, and } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
@@ -6,12 +6,12 @@ import { User } from "typesOpenAPI";
 import { hashPassword } from "utils";
 import { z } from 'zod';
 
-export class AuthLogin extends OpenAPIRoute {
+export class changePassword extends OpenAPIRoute {
     static schema = {
-        tags: ['Auth'],
-        summary: 'Login user',
+        tags: ['User'],
+        summary: 'Change Password',
         requestBody: {
-            email: new Email(),
+            oldPassword: z.string().min(8).max(16),
             password: z.string().min(8).max(16),
         },
         responses: {
@@ -19,13 +19,6 @@ export class AuthLogin extends OpenAPIRoute {
                 description: "Successful response",
                 schema: {
                     success: Boolean,
-                    result: {
-                        session: {
-                            token: String,
-                            expires_at: String,
-                        },
-                        user: User,
-                    },
                 },
             },
             '400': {
@@ -55,40 +48,38 @@ export class AuthLogin extends OpenAPIRoute {
         }
 
         try {
-            const { email, password } = data.body;
-            const hashedPassword = await hashPassword(password, env.SECRET);
+            const { oldPassword, password } = data.body;
+            const hashedPassword = await hashPassword(oldPassword, env.SECRET);
             const db = drizzle(env.DB);
 
-            const results = await db.select().from(users).where(and(eq(users.email, email), eq(users.password, hashedPassword)));
-
+            const results = await db.select().from(users).where(and(eq(users.password, hashedPassword), eq(users.user_id, env.user_id)));
+            // return new Response(JSON.stringify({
+            //     success: true,
+            //     results
+            // }), {
+            //     headers: {
+            //         ...corsHeaders,
+            //         'content-type': 'application/json;charset=UTF-8',
+            //     },
+            // });
             if (!results[0]) {
                 return new Response(JSON.stringify({
                     success: false,
-                    message: "Unknown user",
+                    message: "Old Password incorrect",
                 }), {
                     headers: {
                         ...corsHeaders,
-                        'content-type': 'application/json;charset=UTF-8',
+                        'Content-Type': 'application/json;charset=UTF-8',
                     },
                 });
             }
 
-            let expiration = new Date();
-            expiration.setDate(expiration.getDate() + 7);
-            let timeDate = expiration.getTime();
-            let token = await hashPassword((Math.random() + 1).toString(3), env.SECRET);
-            const session = await db.insert(users_sessions).values({ user_id: results[0].user_id, token: token, expires_at: timeDate }).returning();
-            const user = await db.select().from(users).where(eq(users.user_id, session[0].user_id));
+            const newPassword = await hashPassword(password, env.SECRET);
+            const result = await db.update(users).set({ password: newPassword }).where(eq(users.user_id, env.user_id)).returning();
 
             return new Response(JSON.stringify({
                 success: true,
-                result: {
-                    session: {
-                        token: session[0].token,
-                        expires_at: session[0].expires_at,
-                    },
-                    user: user[0],
-                },
+                result
             }), {
                 headers: {
                     ...corsHeaders,

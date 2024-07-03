@@ -19,33 +19,50 @@ export class GetCoursesByInstrucId extends OpenAPIRoute {
 
  
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
+
+        const corsHeaders = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        };
+
+        // if (request.method === 'OPTIONS') {
+        //     return new Response(null, {
+        //         headers: {
+        //             ...corsHeaders,
+        //             'Access-Control-Max-Age': '86400',
+        //         },
+        //     });
+        // }
+
+
         try {
 
             const db = drizzle(env.DB);
-            const courseResults = await db.select().from(courses).where(and(eq(courses.is_verify, true), eq(courses.instructor_id, env.user_id))).all();
+            const courseResults = await db.select().from(courses).where(eq(courses.instructor_id, env.user_id)).all();
 
             if (!courseResults || courseResults.length === 0) {
-                return {
+                return new Response(JSON.stringify({
                     success: false,
-                    message: 'No courses found'
-                }
+                    message: "No courses found",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             }
     
-            // Fetch all chapters
-            const chapterResults = await db.select().from(chapters).all();
-
-            // Nest chapters within their respective courses
-            const coursesWithChapters = courseResults.map(course => {
-                return {
-                    ...course,
-                    chapters: chapterResults.filter(chapter => chapter.course_id === course.course_id)
-                };
+       
+            return new Response(JSON.stringify({
+                success: true,
+                courses: courseResults
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
             });
-
-            return  { 
-                success: true, 
-                courses: coursesWithChapters 
-            }
         } catch (e) {
             return new Response(e)
         }

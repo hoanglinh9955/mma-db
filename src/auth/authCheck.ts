@@ -1,4 +1,4 @@
-import { Email, OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
+import { Email, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
 import { users, users_sessions } from "db/schema";
 import { eq, and } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
@@ -6,26 +6,20 @@ import { User } from "typesOpenAPI";
 import { hashPassword } from "utils";
 import { z } from 'zod';
 
-export class AuthLogin extends OpenAPIRoute {
+export class AuthCheck extends OpenAPIRoute {
     static schema = {
         tags: ['Auth'],
-        summary: 'Login user',
-        requestBody: {
-            email: new Email(),
-            password: z.string().min(8).max(16),
-        },
+        summary: 'check user session',
+        parameters: {
+            tokenSession: Query(Str, {
+              description: 'input session token',
+            }),
+          },
         responses: {
             '200': {
                 description: "Successful response",
                 schema: {
                     success: Boolean,
-                    result: {
-                        session: {
-                            token: String,
-                            expires_at: String,
-                        },
-                        user: User,
-                    },
                 },
             },
             '400': {
@@ -55,16 +49,15 @@ export class AuthLogin extends OpenAPIRoute {
         }
 
         try {
-            const { email, password } = data.body;
-            const hashedPassword = await hashPassword(password, env.SECRET);
+            const { tokenSession } = data.query;
             const db = drizzle(env.DB);
 
-            const results = await db.select().from(users).where(and(eq(users.email, email), eq(users.password, hashedPassword)));
+            const results = await db.select().from(users_sessions).where(eq(users_sessions.token, tokenSession));
 
             if (!results[0]) {
                 return new Response(JSON.stringify({
                     success: false,
-                    message: "Unknown user",
+                    message: "Token not found",
                 }), {
                     headers: {
                         ...corsHeaders,
@@ -73,22 +66,9 @@ export class AuthLogin extends OpenAPIRoute {
                 });
             }
 
-            let expiration = new Date();
-            expiration.setDate(expiration.getDate() + 7);
-            let timeDate = expiration.getTime();
-            let token = await hashPassword((Math.random() + 1).toString(3), env.SECRET);
-            const session = await db.insert(users_sessions).values({ user_id: results[0].user_id, token: token, expires_at: timeDate }).returning();
-            const user = await db.select().from(users).where(eq(users.user_id, session[0].user_id));
-
             return new Response(JSON.stringify({
                 success: true,
-                result: {
-                    session: {
-                        token: session[0].token,
-                        expires_at: session[0].expires_at,
-                    },
-                    user: user[0],
-                },
+                results
             }), {
                 headers: {
                     ...corsHeaders,

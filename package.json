@@ -13,7 +13,8 @@
 	"dependencies": {
 		"@cloudflare/itty-router-openapi": "^1.0.1",
 		"drizzle-orm": "^0.31.1",
-		"itty-router": "^5.0.17"
+		"itty-router": "^5.0.17",
+		"resend": "^3.4.0"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240605.0",

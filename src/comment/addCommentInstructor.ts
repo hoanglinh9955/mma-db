@@ -46,12 +46,7 @@ export class AddCommentInstructor extends OpenAPIRoute {
             const db = drizzle(env.DB);
 
             const result = await db.insert(comments).values(comment).returning();
-            if (!request) {
-                return {
-                    success: false,
-                    message: 'No enrollment was inserted'
-                }
-            }
+      
 
       
             const userList = await db.select().from(users).where(eq(users.role, 'USER')).all()  
