@@ -3,12 +3,12 @@ import { authenticateInstructor, authenticateUser } from "auth/authenticateUser"
 import { AuthLogin } from "auth/authLogin";
 import { AuthRegister } from "auth/authResgister";
 import { AddComment } from "comment/addComment";
-import { AddCommentInstructor } from "comment/addCommentInstructor";
+import { AddCommentInstructor } from "instructor/addCommentInstructor";
 import { getCommentByCourseId } from "comment/getCommentByCourseId";
-import { AddCourse } from "course/addCourse";
+
 import { deleteCompleteCourse } from "course/deleteCompleteChapter";
 import { GetCourseById } from "course/getCourseById";
-import { GetCoursesByInstrucId } from "course/getCourseByInstrucId";
+import { GetCoursesByInstrucId } from "instructor/getCourseByInstrucId";
 import { GetCoursesByInstructorId } from "course/getCourseByInstructorId";
 import { GetCourses } from "course/getCourses";
 import { GetCoursesByInstructor } from "course/getInstructors";
@@ -16,10 +16,9 @@ import { GetMartCourse } from "course/getMartCourse";
 import { MartCourse } from "course/markCourse";
 import { AddEnroll } from "enroll/addEnroll";
 import { GetEnroll } from "enroll/getEnroll";
-import { GetOrderByInstructor } from "enroll/getOrderByInstructor";
+import { GetOrderByInstructor } from "instructor/getOrderByInstructor";
 import { GetUser } from "users/getAllUsers";
 import { UpdateCustomerProfile } from "users/updateCustomerProfile";
-import { UpdateInstructorProfile } from "users/updateInstructorProfile";
 import { AutoRouter, cors } from 'itty-router'
 import { AuthCheck } from "auth/authCheck";
 import { EditComment } from "comment/editCommentByCommentId";
@@ -27,6 +26,9 @@ import { DeleteComment } from "comment/deleteCommentByComId";
 import { changePassword } from "auth/changePassword";
 import { ForgetPassword } from "auth/forgetPassword";
 import { changePasswordWithResetToken } from "auth/changePasswordWithResetToken";
+import { AddCourse } from "instructor/addCourse";
+import { UpdateInstructorProfile } from "instructor/updateInstructorProfile";
+import { GetCourseDetail } from "instructor/getCourseDetail";
 
 const { preflight, corsify } = cors()
 
@@ -87,7 +89,7 @@ router.post("/api/instructor/addComment", AddCommentInstructor);
 router.put("/api/instructor/updateInstructorProfile", UpdateInstructorProfile);
 router.get("/api/instructor/getCommentByCourseId", getCommentByCourseId);
 router.get("/api/instructor/getOrderByInstructor", GetOrderByInstructor);
-
+router.get("/api/instructor/getCourseDetail", GetCourseDetail);
 
 router.all('*', corsify)
 

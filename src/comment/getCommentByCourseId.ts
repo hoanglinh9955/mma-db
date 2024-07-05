@@ -24,33 +24,77 @@ export class getCommentByCourseId extends OpenAPIRoute {
 
  
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
+        const corsHeaders = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        };
+
+        // if (request.method === 'OPTIONS') {
+        //     return new Response(null, {
+        //         headers: {
+        //             ...corsHeaders,
+        //             'Access-Control-Max-Age': '86400',
+        //         },
+        //     });
+        // }
+
+
+        
         try {
             const { course_id } = data.query
 
             if (!course_id) {
-                return {
+                // return {
+                //     success: false,
+                //     message: 'Invalid course_id'
+                // }
+                return new Response(JSON.stringify({
                     success: false,
-                    message: 'Invalid course_id'
-                }
+                    message: "Invalid course_id",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             }
 
             const db = drizzle(env.DB);
 
             const result = await db.select().from(comments).where(eq(comments.course_id, course_id)).all();
             if (result.length == 0) {
-                return {
+                // return {
+                //     success: false,
+                //     message: 'No comments found'
+                // }
+                return new Response(JSON.stringify({
                     success: false,
-                    message: 'No comments found'
-                }
+                    message: "No comments found",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             }
 
-            const userList = await db.select().from(users).where(eq(users.role, 'USER')).all()  
+            const userList = await db.select().from(users).all()  
 
             const commentWithUsers = result.map(comment => {
-                return {
+                // return {
+                //     ...comment,
+                //     userData: userList.find(user => user.user_id === comment.user_id)
+                // };
+                return new Response(JSON.stringify({
                     ...comment,
                     userData: userList.find(user => user.user_id === comment.user_id)
-                };
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             });
 
       

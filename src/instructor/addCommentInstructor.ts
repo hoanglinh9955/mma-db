@@ -26,21 +26,55 @@ export class AddCommentInstructor extends OpenAPIRoute {
 
  
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
+        const corsHeaders = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        };
+
+        // if (request.method === 'OPTIONS') {
+        //     return new Response(null, {
+        //         headers: {
+        //             ...corsHeaders,
+        //             'Access-Control-Max-Age': '86400',
+        //         },
+        //     });
+        // }
+
+
         try {
             if (!data || !data.body) {
-                return {
+                // return {
+                //     success: false,
+                //     message: 'Request body is missing'
+                // }
+                return new Response(JSON.stringify({
                     success: false,
-                    message: 'Request body is missing'
-                }
+                    message: "Request body is missing",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             }
 
             const { comment } = data.body;
 
             if (!comment) {
-                return {
+                // return {
+                //     success: false,
+                //     message: 'Invalid comment data'
+                // }
+                return new Response(JSON.stringify({
                     success: false,
-                    message: 'Invalid comment data'
-                }
+                    message: "Invalid comment data",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             }
             comment.user_id = env.user_id;
             const db = drizzle(env.DB);
@@ -52,10 +86,19 @@ export class AddCommentInstructor extends OpenAPIRoute {
             const userList = await db.select().from(users).where(eq(users.role, 'USER')).all()  
 
             const commentWithUsers = result.map(comment => {
-                return {
+                // return {
+                //     ...comment,
+                //     userData: userList.find(user => user.user_id === comment.user_id)
+                // };
+                return new Response(JSON.stringify({
                     ...comment,
                     userData: userList.find(user => user.user_id === comment.user_id)
-                };
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json;charset=UTF-8',
+                    },
+                });
             });
 
       
