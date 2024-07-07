@@ -68,20 +68,28 @@ export class GetOrderByInstructor extends OpenAPIRoute {
             }
             const courseResults = await db.select().from(courses).where(eq(courses.instructor_id, env.user_id)).all()
 
-            const chapterResults = await db.select().from(chapters).all()
-
+            const userResults = await db.select().from(users).all()
             const orderWithCourseAndChapter = result.map(order => {
                 return {
                     ...order,
                     course: courseResults.find(course => course.course_id === order.course_id),
-                    chapter: chapterResults.filter(chapter => chapter.course_id === order.course_id)
+                    user: userResults.find(user => user.user_id === order.user_id)
                 };
             });
       
-            return { 
+            // return { 
+            //     success: true,
+            //     orderWithCourseAndChapter
+            // }
+            return new Response(JSON.stringify({
                 success: true,
                 orderWithCourseAndChapter
-            }
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+            });
 
         } catch (e) {
             return new Response(e)

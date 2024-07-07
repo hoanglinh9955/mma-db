@@ -4,7 +4,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
   user_id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  user_name: text('user_name', { length: 255 }),
+  user_name: text('user_name', { length: 255 }).unique(),
   instruction_description: text('instruction_description'),
   email: text('email', { length: 255 }).unique(),
   password: text('password'),
@@ -30,6 +30,7 @@ export const courses = sqliteTable('courses', {
   is_trial: integer('is_trial', { mode: 'boolean' }),
   is_verify: integer('is_verify', { mode: 'boolean' }),
   is_submit: integer('is_submit', { mode: 'boolean' }),
+  is_update: integer('is_update', { mode: 'boolean' }),
   image_url: text('image_url'),
   hour: integer('hour', { mode: 'number' }),
   create_at: integer('create_at'),
@@ -46,7 +47,6 @@ export const chapters = sqliteTable('chapter', {
   content_url: text('content_url'),
 });
 
-
 export const enrollments = sqliteTable('enrollments', {
   enrollment_id: integer('enrollment_id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   user_id: integer('customer_id').references(() => users.user_id),
@@ -56,7 +56,6 @@ export const enrollments = sqliteTable('enrollments', {
   price: integer('price', { mode: 'number' }),
 });
 
-
 export const comments = sqliteTable('comments', {
   comment_id: integer('comment_id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   user_id: integer('user_id').references(() => users.user_id),
@@ -64,6 +63,7 @@ export const comments = sqliteTable('comments', {
   rate: integer('rate'),
   comment: text('comment'),
   comment_at: integer('comment_at'),
+  parent_id: integer('parent_id'),
 });
 
 export const user_complete_chapter = sqliteTable('user_complete_chapter', {

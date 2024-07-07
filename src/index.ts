@@ -1,5 +1,5 @@
 import { OpenAPIRouter } from "@cloudflare/itty-router-openapi";
-import { authenticateInstructor, authenticateUser } from "auth/authenticateUser";
+import { authenticateAdmin, authenticateInstructor, authenticateUser } from "auth/authenticateUser";
 import { AuthLogin } from "auth/authLogin";
 import { AuthRegister } from "auth/authResgister";
 import { AddComment } from "comment/addComment";
@@ -17,7 +17,6 @@ import { MartCourse } from "course/markCourse";
 import { AddEnroll } from "enroll/addEnroll";
 import { GetEnroll } from "enroll/getEnroll";
 import { GetOrderByInstructor } from "instructor/getOrderByInstructor";
-import { GetUser } from "users/getAllUsers";
 import { UpdateCustomerProfile } from "users/updateCustomerProfile";
 import { AutoRouter, cors } from 'itty-router'
 import { AuthCheck } from "auth/authCheck";
@@ -29,6 +28,10 @@ import { changePasswordWithResetToken } from "auth/changePasswordWithResetToken"
 import { AddCourse } from "instructor/addCourse";
 import { UpdateInstructorProfile } from "instructor/updateInstructorProfile";
 import { GetCourseDetail } from "instructor/getCourseDetail";
+import { DeleteCommentInstructor } from "instructor/deleteCommentByCommentId";
+import { EditCommentInstructor } from "instructor/editcomment";
+import { GetUsers } from "admin/getAllUsers";
+import { GetAllCourses } from "admin/getCourses";
 
 const { preflight, corsify } = cors()
 
@@ -90,6 +93,12 @@ router.put("/api/instructor/updateInstructorProfile", UpdateInstructorProfile);
 router.get("/api/instructor/getCommentByCourseId", getCommentByCourseId);
 router.get("/api/instructor/getOrderByInstructor", GetOrderByInstructor);
 router.get("/api/instructor/getCourseDetail", GetCourseDetail);
+router.delete("/api/instructor/deleteComment", DeleteCommentInstructor);
+router.put("/api/instructor/editComment", EditCommentInstructor);
+
+router.all('/api/admin/*', authenticateAdmin)
+router.get("/api/admin/getAllUsers", GetUsers);
+router.get("/api/admin/getAllCourses", GetAllCourses);
 
 router.all('*', corsify)
 

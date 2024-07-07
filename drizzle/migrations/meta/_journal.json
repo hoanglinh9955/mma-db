@@ -50,6 +50,41 @@
       "when": 1719384582062,
       "tag": "0006_fuzzy_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1720148506484,
+      "tag": "0007_equal_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1720240638591,
+      "tag": "0008_breezy_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1720246448915,
+      "tag": "0009_bumpy_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1720246536276,
+      "tag": "0010_overjoyed_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1720347992771,
+      "tag": "0011_fat_kree",
+      "breakpoints": true
     }
   ]
 }

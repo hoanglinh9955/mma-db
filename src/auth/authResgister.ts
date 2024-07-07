@@ -1,5 +1,6 @@
 import { Email, OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
 import { users } from "db/schema";
+import { eq } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
 import { date } from "drizzle-orm/mysql-core";
 import { User } from "typesOpenAPI";
@@ -39,6 +40,20 @@ export class AuthRegister extends OpenAPIRoute {
             const { user_name, email, password } = data.body;
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
+            const checkUserName = await db.select().from(users).where(eq(users.user_name, user_name)).all();
+            if(checkUserName.length > 0){
+                return {
+                    success: false,
+                    error: 'Username already exists'
+                }
+            }
+            const checkMail = await db.select().from(users).where(eq(users.email, email)).all();
+            if(checkMail.length > 0){
+                return {
+                    success: false,
+                    error: 'Email already exists'
+                }
+            }
             const results = await db.insert(users).values({ user_name: user_name, email: email, password: hashedPassword, image_url: 'https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg', role: 'USER'}).returning();
 
             return {

@@ -62,8 +62,8 @@ export class getCommentByCourseId extends OpenAPIRoute {
 
             const db = drizzle(env.DB);
 
-            const result = await db.select().from(comments).where(eq(comments.course_id, course_id)).all();
-            if (result.length == 0) {
+            const commentList = await db.select().from(comments).where(eq(comments.course_id, course_id)).all();
+            if (commentList.length == 0) {
                 // return {
                 //     success: false,
                 //     message: 'No comments found'
@@ -81,27 +81,38 @@ export class getCommentByCourseId extends OpenAPIRoute {
 
             const userList = await db.select().from(users).all()  
 
-            const commentWithUsers = result.map(comment => {
-                // return {
-                //     ...comment,
-                //     userData: userList.find(user => user.user_id === comment.user_id)
-                // };
-                return new Response(JSON.stringify({
+            const commentWithUsers = commentList
+            .filter(comment => !comment.parent_id)
+            .map(comment => {
+                return {
                     ...comment,
-                    userData: userList.find(user => user.user_id === comment.user_id)
-                }), {
-                    headers: {
-                        ...corsHeaders,
-                        'Content-Type': 'application/json;charset=UTF-8',
-                    },
-                });
+                    userData: userList.find(user => user.user_id === comment.user_id),
+                    children: commentList
+                                .filter(child => child.parent_id === comment.comment_id)
+                                .map(children => {
+                                    return {
+                                        ...children,
+                                        userData: userList.find(user => user.user_id === children.user_id)
+                                    }
+                                
+                                })
+                };
             });
 
       
-            return { 
-                success: true, 
+            // return { 
+            //     success: true, 
+            //     comments: commentWithUsers
+            // }    
+            return new Response(JSON.stringify({
+                success: true,
                 comments: commentWithUsers
-            }    
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+            });
 
         } catch (e) {
             return new Response(e)
