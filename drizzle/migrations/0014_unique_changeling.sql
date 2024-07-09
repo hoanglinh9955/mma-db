@@ -1,0 +1,1 @@
+ALTER TABLE `courses` ADD `comment_at` integer;

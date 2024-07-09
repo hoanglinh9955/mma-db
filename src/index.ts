@@ -1,5 +1,5 @@
 import { OpenAPIRouter } from "@cloudflare/itty-router-openapi";
-import { authenticateAdmin, authenticateInstructor, authenticateUser } from "auth/authenticateUser";
+import { authenticateAdmin, authenticateInstructor, authenticateStaff, authenticateUser } from "auth/authenticateUser";
 import { AuthLogin } from "auth/authLogin";
 import { AuthRegister } from "auth/authResgister";
 import { AddComment } from "comment/addComment";
@@ -26,12 +26,17 @@ import { changePassword } from "auth/changePassword";
 import { ForgetPassword } from "auth/forgetPassword";
 import { changePasswordWithResetToken } from "auth/changePasswordWithResetToken";
 import { AddCourse } from "instructor/addCourse";
-import { UpdateInstructorProfile } from "instructor/updateInstructorProfile";
 import { GetCourseDetail } from "instructor/getCourseDetail";
 import { DeleteCommentInstructor } from "instructor/deleteCommentByCommentId";
 import { EditCommentInstructor } from "instructor/editcomment";
 import { GetUsers } from "admin/getAllUsers";
 import { GetAllCourses } from "admin/getCourses";
+import { GetCourseDetailAdmin } from "admin/getCourseDetail";
+import { CommentCourse } from "admin/commentCourse";
+import { UpdateInstructorProfile } from "instructor/updateProfile";
+import { ChangeStatus } from "admin/changeStatus";
+import { AddNewUser } from "admin/addNewUser";
+import { GetOrder } from "admin/getOrder";
 
 const { preflight, corsify } = cors()
 
@@ -89,16 +94,31 @@ router.all('/api/instructor/*', authenticateInstructor)
 router.post("/api/instructor/course", AddCourse);
 router.get("/api/instructor/getCourseByInstructorId", GetCoursesByInstrucId);
 router.post("/api/instructor/addComment", AddCommentInstructor);
-router.put("/api/instructor/updateInstructorProfile", UpdateInstructorProfile);
 router.get("/api/instructor/getCommentByCourseId", getCommentByCourseId);
 router.get("/api/instructor/getOrderByInstructor", GetOrderByInstructor);
 router.get("/api/instructor/getCourseDetail", GetCourseDetail);
 router.delete("/api/instructor/deleteComment", DeleteCommentInstructor);
 router.put("/api/instructor/editComment", EditCommentInstructor);
+router.put("/api/instructor/updateProfile", UpdateInstructorProfile);
 
+//Admin
 router.all('/api/admin/*', authenticateAdmin)
 router.get("/api/admin/getAllUsers", GetUsers);
 router.get("/api/admin/getAllCourses", GetAllCourses);
+router.get("/api/admin/getCourseDetail", GetCourseDetailAdmin);
+router.put("/api/admin/addComment", CommentCourse);
+router.post("/api/admin/changeStatus", ChangeStatus);
+router.post("/api/admin/addNewUser", AddNewUser);
+router.get("/api/admin/getOrder", GetOrder);
+//staff
+router.all('/api/staff/*', authenticateStaff)
+router.get("/api/staff/getAllUsers", GetUsers);
+router.get("/api/staff/getAllCourses", GetAllCourses);
+router.get("/api/staff/getCourseDetail", GetCourseDetailAdmin);
+router.put("/api/staff/addComment", CommentCourse);
+router.post("/api/staff/changeStatus", ChangeStatus);
+router.post("/api/staff/addNewUser", AddNewUser);
+router.get("/api/staff/getOrder", GetOrder);
 
 router.all('*', corsify)
 

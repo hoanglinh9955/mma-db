@@ -1,6 +1,4 @@
-import { time } from 'console';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-
 
 export const users = sqliteTable('users', {
   user_id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -9,8 +7,9 @@ export const users = sqliteTable('users', {
   email: text('email', { length: 255 }).unique(),
   password: text('password'),
   date_of_birth: text('date_of_birth'),
-  role: text('role', { enum: ["USER", "ADMIN", "INSTRUCTOR", "STAFF"] }), // enum
+  role: text('role', { enum: ["USER", "ADMIN", "INSTRUCTOR", "STAFF"]}),
   image_url: text('image_url'),
+  status: integer('status', { mode: 'boolean' }).default(true),
 });
 
 export const users_sessions = sqliteTable('users_sessions', {
@@ -37,6 +36,8 @@ export const courses = sqliteTable('courses', {
   update_at: integer('update_at'),
   comments: text('comments'),
   comment_owner: text('comment_owner'),
+  comment_owner_avatar: text('comment_owner_avatar'),
+  comment_at: integer('comment_at'),
 });
 
 export const chapters = sqliteTable('chapter', {

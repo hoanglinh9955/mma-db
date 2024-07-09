@@ -1,0 +1,1 @@
+ALTER TABLE `courses` RENAME COLUMN `comment_owner_avater` TO `comment_owner_avatar`;

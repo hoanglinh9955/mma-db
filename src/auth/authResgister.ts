@@ -40,6 +40,15 @@ export class AuthRegister extends OpenAPIRoute {
             const { user_name, email, password } = data.body;
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
+
+            // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            // if (!emailRegex.test(email)) {
+            //     return {
+            //         success: false,
+            //         message: 'Invalid email format'
+            //     };
+            // }
+
             const checkUserName = await db.select().from(users).where(eq(users.user_name, user_name)).all();
             if(checkUserName.length > 0){
                 return {
@@ -47,13 +56,16 @@ export class AuthRegister extends OpenAPIRoute {
                     error: 'Username already exists'
                 }
             }
-            const checkMail = await db.select().from(users).where(eq(users.email, email)).all();
+
+
+            const checkMail = await db.select().from(users).where(eq(users.email, email.toLowerCase())).all();
             if(checkMail.length > 0){
                 return {
                     success: false,
                     error: 'Email already exists'
                 }
             }
+
             const results = await db.insert(users).values({ user_name: user_name, email: email, password: hashedPassword, image_url: 'https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg', role: 'USER'}).returning();
 
             return {

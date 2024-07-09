@@ -103,7 +103,7 @@ export class AddCourse extends OpenAPIRoute {
         } catch (e) {
             return new Response(JSON.stringify({
                 success: false,
-                error: e.message,
+                message: e.message,
             }), {
                 headers: {
                     ...corsHeaders,

@@ -1,12 +1,17 @@
-import { Bool, Int, OpenAPIRoute, Query, Str } from "@cloudflare/itty-router-openapi";
+import { Int, OpenAPIRoute, Query } from "@cloudflare/itty-router-openapi";
 import { courses, users, chapters } from "db/schema";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from 'drizzle-orm/d1';
 import { Chapter, Course, User } from "typesOpenAPI";
-export class GetCoursesByInstrucId extends OpenAPIRoute {
+export class GetCourseDetailAdmin extends OpenAPIRoute {
     static schema = {
-        tags: ["Instructor"],
-        summary: "Get Course By Instructor Id (Instructor)",
+        tags: ["Admin"],
+        summary: "Get Course By Id",
+        parameters: {
+            course_id: Query(Int, {
+              description: 'Input ccourse_id to get the course you want',
+            }),
+          },
         responses: {
             "200": {
               description: "Get Successful",
@@ -19,13 +24,12 @@ export class GetCoursesByInstrucId extends OpenAPIRoute {
 
  
     async handle(request: Request, env: any, context: any, data: Record<string, any>) {
-
         const corsHeaders = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET,HEAD,POST,OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
         };
-
+        
         // if (request.method === 'OPTIONS') {
         //     return new Response(null, {
         //         headers: {
@@ -34,29 +38,46 @@ export class GetCoursesByInstrucId extends OpenAPIRoute {
         //         },
         //     });
         // }
-
-
         try {
+            const { course_id } = data.query
 
             const db = drizzle(env.DB);
-            const courseResults = await db.select().from(courses).where(eq(courses.instructor_id, env.user_id)).all();
+            const courseResults = await db.select().from(courses).where(eq(courses.course_id, course_id)).all();
 
             if (!courseResults || courseResults.length === 0) {
-                return new Response(JSON.stringify({
-                    success: false,
-                    message: "No courses found",
-                }), {
-                    headers: {
-                        ...corsHeaders,
-                        'Content-Type': 'application/json;charset=UTF-8',
-                    },
-                });
+            // return {
+            //     success: false,
+            //     message: 'No courses found'
+            // }
+            return new Response(JSON.stringify({
+                success: false,
+                message: "No courses found",
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+            });
             }
-    
-       
+
+            // Fetch all chapters
+            const chapterResults = await db.select().from(chapters).where(eq(chapters.course_id, course_id)).all();
+
+            // Nest chapters within their respective courses
+            const coursesWithChapters = courseResults.map(course => {
+                return {
+                    ...course,
+                    chapters: chapterResults.filter(chapter => chapter.course_id === course.course_id)
+                };
+            });
+
+            // return  { 
+            //     success: true, 
+            //     courses: coursesWithChapters 
+            // }
             return new Response(JSON.stringify({
                 success: true,
-                courses: courseResults
+                courses: coursesWithChapters,
             }), {
                 headers: {
                     ...corsHeaders,
@@ -64,16 +85,7 @@ export class GetCoursesByInstrucId extends OpenAPIRoute {
                 },
             });
         } catch (e) {
-            return new Response(JSON.stringify({
-                success: false,
-                message: e.message,
-            }), {
-                headers: {
-                    ...corsHeaders,
-                    'Content-Type': 'application/json;charset=UTF-8',
-                },
-            }
-            )
+            return new Response(e)
         }
     }
 }

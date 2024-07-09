@@ -63,11 +63,23 @@ export async function authenticateUser(request: Request, env: any, context: any)
     if (!token || !session[0].user_id) {
         return new Response(JSON.stringify({
             success: false,
-            errors: "Authentication error",
+            message: "Authentication error",
         }), {
             headers: {
                 ...corsHeaders,
                 'Content-Type': 'application/json;charset=UTF-8',
+            },
+        });
+    }
+    const checkStatus = await db.select().from(users).where(eq(users.user_id, session[0].user_id)).all();
+    if(checkStatus[0].status === false){
+        return new Response(JSON.stringify({
+            success: false,
+            message: "User is blocked",
+        }), {
+            headers: {
+                ...corsHeaders,
+                'content-type': 'application/json;charset=UTF-8',
             },
         });
     }
@@ -109,7 +121,7 @@ export async function authenticateInstructor(request: Request, env: any, context
     if (!token || !session[0].user_id) {
         return new Response(JSON.stringify({
             success: false,
-            errors: "Authentication error",
+            message: "Authentication error",
         }), {
             headers: {
                 ...corsHeaders,
@@ -132,6 +144,18 @@ export async function authenticateInstructor(request: Request, env: any, context
         });
     }
 
+    const checkStatus = await db.select().from(users).where(eq(users.user_id, session[0].user_id)).all();
+    if(checkStatus[0].status === false){
+        return new Response(JSON.stringify({
+            success: false,
+            message: "Instructor is blocked",
+        }), {
+            headers: {
+                ...corsHeaders,
+                'content-type': 'application/json;charset=UTF-8',
+            },
+        });
+    }
     env.user_id = session[0].user_id;
 }
 
@@ -169,7 +193,7 @@ export async function authenticateAdmin(request: Request, env: any, context: any
     if (!token || !session[0].user_id) {
         return new Response(JSON.stringify({
             success: false,
-            errors: "Authentication error",
+            message: "Authentication error",
         }), {
             headers: {
                 ...corsHeaders,
@@ -188,6 +212,78 @@ export async function authenticateAdmin(request: Request, env: any, context: any
             headers: {
                 ...corsHeaders,
                 'Content-Type': 'application/json;charset=UTF-8',
+            },
+        });
+    }
+
+    env.user_id = session[0].user_id;
+}
+
+export async function authenticateStaff(request: Request, env: any, context: any) {
+    const corsResponse = handleCors(request);
+    if (corsResponse) {
+        return corsResponse;
+    }
+
+    const token = getBearer(request);
+    let session;
+    let checkQuery;
+    let result;
+    const db = drizzle(env.DB);
+    if (token) {
+        let date = Date.now();
+
+        session = await db.select().from(users_sessions).where(and(gt(users_sessions.expires_at, date), eq(users_sessions.token, token)));
+        checkQuery = await db.select().from(users_sessions).where(and(lt(users_sessions.expires_at, date), eq(users_sessions.token, token)));
+        if (checkQuery.length > 0) {
+            await db.delete(users_sessions).where(eq(users_sessions.token, token));
+            return new Response(JSON.stringify({
+                success: false,
+                message: "Token is expired",
+                errors: "Authentication error",
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+            });
+        }
+    }
+
+    if (!token || !session[0].user_id) {
+        return new Response(JSON.stringify({
+            success: false,
+            message: "Authentication error",
+        }), {
+            headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json;charset=UTF-8',
+            },
+        });
+    }
+
+    result = await db.select().from(users).where(eq(users.user_id, session[0].user_id));
+    if (result[0].role != "STAFF") {
+        return new Response(JSON.stringify({
+            success: false,
+            errors: "Authentication error",
+            message: "You are not an Staff",
+        }), {
+            headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json;charset=UTF-8',
+            },
+        });
+    }
+    const checkStatus = await db.select().from(users).where(eq(users.user_id, session[0].user_id)).all();
+    if(checkStatus[0].status === false){
+        return new Response(JSON.stringify({
+            success: false,
+            message: "Staff is blocked",
+        }), {
+            headers: {
+                ...corsHeaders,
+                'content-type': 'application/json;charset=UTF-8',
             },
         });
     }

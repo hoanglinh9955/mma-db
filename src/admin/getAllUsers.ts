@@ -46,8 +46,8 @@ export class GetUsers extends OpenAPIRoute {
             // let date = new Date()
         // const session = await db.select().from(users_sessions).all()
         // .where(and(gt(users_sessions.expires_at, date), eq(users_sessions.token, token)))
-        
-            return new Response(JSON.stringify({ success: true, results }), {
+            
+            return new Response(JSON.stringify({ success: true, results: results.reverse() }), {
                 headers: {
                     'Content-Type': 'application/json',
                     ...corsHeaders,

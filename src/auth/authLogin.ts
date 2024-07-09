@@ -59,7 +59,7 @@ export class AuthLogin extends OpenAPIRoute {
             const hashedPassword = await hashPassword(password, env.SECRET);
             const db = drizzle(env.DB);
 
-            const results = await db.select().from(users).where(and(eq(users.email, email), eq(users.password, hashedPassword)));
+            const results = await db.select().from(users).where(and(eq(users.email, email.toLowerCase()), eq(users.password, hashedPassword)));
 
             if (!results[0]) {
                 return new Response(JSON.stringify({
@@ -80,6 +80,18 @@ export class AuthLogin extends OpenAPIRoute {
             const session = await db.insert(users_sessions).values({ user_id: results[0].user_id, token: token, expires_at: timeDate }).returning();
             const user = await db.select().from(users).where(eq(users.user_id, session[0].user_id));
 
+            if(user[0].status === false){
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: "Your account is blocked",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'content-type': 'application/json;charset=UTF-8',
+                    },
+                });
+            }
+
             return new Response(JSON.stringify({
                 success: true,
                 result: {
@@ -98,7 +110,7 @@ export class AuthLogin extends OpenAPIRoute {
         } catch (e) {
             return new Response(JSON.stringify({
                 success: false,
-                error: e.message,
+                message: e.message,
             }), {
                 headers: {
                     ...corsHeaders,

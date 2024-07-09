@@ -85,7 +85,16 @@ export class GetCourseDetail extends OpenAPIRoute {
                 },
             });
         } catch (e) {
-            return new Response(e)
+            return new Response(JSON.stringify({
+                success: false,
+                message: e.message,
+            }), {
+                headers: {
+                    ...corsHeaders,
+                    'Content-Type': 'application/json;charset=UTF-8',
+                },
+            }
+            )
         }
     }
 }

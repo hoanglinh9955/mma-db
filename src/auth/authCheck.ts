@@ -66,6 +66,20 @@ export class AuthCheck extends OpenAPIRoute {
                 });
             }
 
+            const userCheckStatus = await db.select().from(users).where(eq(users.user_id, results[0].user_id)).all();
+
+            if(userCheckStatus[0].status === false){
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: "User is blocked",
+                }), {
+                    headers: {
+                        ...corsHeaders,
+                        'content-type': 'application/json;charset=UTF-8',
+                    },
+                });
+            }
+            
             return new Response(JSON.stringify({
                 success: true,
                 results
